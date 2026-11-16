@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#13755f">
+  <meta name="description" content="RoleModel: Bidirectional Rolling Data Synthesis for Distilling Time-Series Forecasting Models. Better supervision for lightweight forecasting, without representation alignment.">
+  <meta property="og:title" content="RoleModel · Better supervision for time-series forecasting">
+  <meta property="og:description" content="Roll forward and backward teachers. Select informative samples. Distill lightweight forecasters through outputs alone.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/figures/figure-2.webp">
+  <title>RoleModel · Bidirectional Rolling Distillation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%2313755f'/%3E%3Ctext x='20' y='29' text-anchor='middle' fill='white' font-family='Georgia' font-size='30'%3ER%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/latin-modern-caps.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="assets/fonts/serif.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/sans-regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script src="assets/vendor/lucide.min.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="distillation-data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#overview">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="#top" aria-label="RoleModel home"><span class="brand-symbol"><i data-lucide="repeat-2" aria-hidden="true"></i></span>RoleModel<span class="brand-period">.</span></a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#overview">Overview</a><a href="#method">RoleModel</a><a href="#lambs">LAMBS</a><a href="#results">Results</a><a href="#compatibility">Compatibility</a><a href="#findings">Findings</a>
+      </nav>
+      <button class="icon-button menu-toggle" id="MenuToggle" aria-label="Open navigation" aria-expanded="false" aria-controls="MobileNavigation"><i data-lucide="menu" aria-hidden="true"></i></button>
+    </div>
+    <nav class="mobile-nav" id="MobileNavigation" aria-label="Mobile navigation" hidden>
+      <a href="#overview">Overview</a><a href="#method">RoleModel</a><a href="#lambs">LAMBS</a><a href="#results">Results</a><a href="#compatibility">Compatibility</a><a href="#findings">Findings</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="HeroTitle">
+      <div class="hero-copy container">
+        <p class="eyebrow hero-eyebrow"><span class="status-square"></span>TIME-SERIES FORECASTING <span class="eyebrow-divider">/</span> KNOWLEDGE DISTILLATION</p>
+        <h1 id="HeroTitle" class="paper-name"><span class="hero-role">Role</span><span class="hero-model">Model</span><span class="title-period">.</span></h1>
+        <p class="paper-title">Bidirectional Rolling Data Synthesis<br class="desktop-break"> for Distilling Time-Series Forecasting Models</p>
+      </div>
+      <figure class="hero-figure container">
+        <button class="figure-button" data-figure="2" aria-label="Enlarge the RoleModel framework comparison">
+          <img src="assets/figures/figure-2.webp" width="2600" height="649" alt="Vanilla distillation uses teacher outputs, traditional distillation adds representation alignment, and RoleModel rolls forward and backward teachers before student-aware sample selection." fetchpriority="high">
+          <span class="figure-zoom"><i data-lucide="expand" aria-hidden="true"></i></span>
+        </button>
+        <figcaption><span class="figure-number">THE BIG PICTURE</span>Same lightweight student. A richer way to learn from its teachers.<span class="source-reference">Fig. 2</span></figcaption>
+      </figure>
+    </section>
+
+    <div class="metrics-band">
+      <div class="container metrics-inner">
+        <div><span class="metric-value">7</span><span class="metric-label">forecasting datasets</span></div>
+        <div><span class="metric-value">8</span><span class="metric-label">student architectures</span></div>
+        <div><span class="metric-value paper-name">Lambs</span><span class="metric-label">a student designed for RoleModel</span></div>
+        <div><span class="metric-value">No</span><span class="metric-label">representation alignment required</span></div>
+      </div>
+    </div>
+
+    <section id="overview" class="section container">
+      <div class="section-kicker"><span>01 / THE IDEA</span><span class="kicker-line"></span></div>
+      <div class="section-heading overview-heading">
+        <h2>A teacher can do<br>more than <em>predict.</em></h2>
+        <div class="heading-description"><p>Conventional output distillation aligns a student’s forecasts with a teacher’s outputs on observed histories. RoleModel asks a different question: <strong>what if the teacher could create better examples to learn from?</strong></p><p>A forward teacher predicts the future; a backward teacher reconstructs the history. Together, they generate new history–future pairs. The student selects useful, non-redundant supervision as it learns.</p></div>
+      </div>
+      <div class="principles">
+        <article><span class="principle-icon"><i data-lucide="repeat-2" aria-hidden="true"></i></span><h3>Roll to synthesize</h3><p>Alternate two frozen teachers to expand both historical inputs and their forecasting targets beyond the original samples.</p></article>
+        <article><span class="principle-icon coral"><i data-lucide="list-filter" aria-hidden="true"></i></span><h3>Select for the student</h3><p>Combine teacher–student discrepancy with sample diversity, prioritizing unlearned knowledge without repeating similar examples.</p></article>
+        <article><span class="principle-icon blue"><i data-lucide="unplug" aria-hidden="true"></i></span><h3>Keep the interface simple</h3><p>Transfer knowledge through sequence outputs. No representation alignment, no extra student parameters, no teacher at inference time.</p></article>
+      </div>
+      <div class="compatibility-explanation">
+        <div class="compatibility-copy"><h3><i data-lucide="layers-2" aria-hidden="true"></i>Why does output alignment broaden student compatibility?</h3><p>Representation-based students learn representations before prediction. Direct-mapping students such as DLinear, NLinear, and SparseTSF produce forecasts without a separately learned representation. Both support output alignment, while only Representation-based students provide representations for alignment.</p></div>
+        <figure class="compatibility-figure"><button class="figure-button" data-figure="1" aria-label="Enlarge student-architecture compatibility figure"><img src="assets/figures/figure-1.webp" width="2600" height="1620" alt="Representation-based and Direct-mapping students both support output alignment, but only Representation-based students provide representations for alignment." loading="lazy"></button><figcaption>Fig. 1 · Compatibility of output- and representation-level alignment.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="method" class="section section-tint">
+      <div class="container">
+        <div class="section-kicker"><span>02 / THE METHOD</span><span class="kicker-line"></span></div>
+        <div class="section-heading method-heading"><h2><span class="method-name paper-name">RoleModel</span><span class="method-tagline">Roll the teachers.<br><em>Grow the supervision.</em></span></h2><p class="heading-description">RoleModel combines bidirectional rolling sample synthesis with student-aware sample selection. Its three stages train forward and backward teachers, synthesize history–future pairs, and select informative samples for output alignment.</p></div>
+        <div class="method-tabs" role="tablist" aria-label="RoleModel stages">
+          <button id="StageTab0" class="method-tab" role="tab" aria-selected="true" aria-controls="StagePanel" data-stage="0"><span>01</span>Teacher training<i data-lucide="arrow-right" aria-hidden="true"></i></button>
+          <button id="StageTab1" class="method-tab" role="tab" aria-selected="false" aria-controls="StagePanel" tabindex="-1" data-stage="1"><span>02</span>Rolling sample synthesis<i data-lucide="arrow-right" aria-hidden="true"></i></button>
+          <button id="StageTab2" class="method-tab" role="tab" aria-selected="false" aria-controls="StagePanel" tabindex="-1" data-stage="2"><span>03</span>Student-aware selection<i data-lucide="arrow-right" aria-hidden="true"></i></button>
+        </div>
+        <div id="StagePanel" class="stage-panel" role="tabpanel" aria-labelledby="StageTab0">
+          <div class="stage-visual"><button class="figure-button" id="StageFigureButton" data-figure="3" aria-label="Enlarge the teacher training figure"><img id="StageImage" src="assets/figures/figure-3.webp" width="2600" height="1287" alt="The forward and backward teachers learn opposite directions independently from original clean training pairs." loading="lazy"><span class="figure-zoom"><i data-lucide="expand" aria-hidden="true"></i></span></button></div>
+          <div class="stage-description"><div><p class="tiny-label" id="StageLabel">STEP 01 · TEACHER TRAINING</p><h3 id="StageTitle">Learn the relationship in both directions.</h3><p id="StageDescription">Train the forward teacher ℱ to map history X to future Y, and the backward teacher ℬ to map Y back to X. Both learn from original training pairs, and both are frozen before synthesis.</p></div><div class="equation-block" id="StageEquation"><div><span>Forward</span><span class="math">ℱ : X → Y</span></div><div><span>Backward</span><span class="math">ℬ : Y → X</span></div><p>Original pairs supervise both teachers. Neither teacher is updated during distillation.</p></div></div>
+        </div>
+        <div class="method-takeaway"><i data-lucide="lightbulb" aria-hidden="true"></i><p><strong>Different roles, one forecasting task.</strong> The backward teacher expands the historical inputs. The forward teacher provides targets for history-to-future prediction.</p></div>
+      </div>
+    </section>
+
+    <section id="lambs" class="section container">
+      <div class="section-kicker"><span>03 / THE LIGHTWEIGHT STUDENT</span><span class="kicker-line"></span></div>
+      <div class="section-heading lambs-heading"><h2><span class="student-name paper-name">Lambs</span><span class="student-expansion">(<span class="expansion-word"><strong class="acronym-initial">L</strong>ightweight</span> <span class="expansion-word"><strong class="acronym-initial">A</strong>nd</span> <span class="expansion-word"><strong class="acronym-initial">M</strong>LP</span> <span class="expansion-word"><strong class="acronym-initial">B</strong>ased</span> <span class="expansion-word"><strong class="acronym-initial">S</strong>tudent</span>)</span></h2><div class="heading-description"><p class="student-purpose">Designed specifically for the RoleModel distillation framework.</p><p>A channel-dependent main branch captures multivariate context. A channel-independent residual branch preserves each variable’s own history. Together, they give a lightweight student the capacity to learn from its teachers.</p></div></div>
+      <figure class="architecture-figure"><button class="figure-button" data-figure="8" aria-label="Enlarge the LAMBS architecture"><img src="assets/figures/figure-8.webp" width="2600" height="680" alt="LAMBS jointly embeds channels at each time step, aggregates them with a shared bottom-up tree, adds each channel's independent residual, and produces forecasts through a shared head." loading="lazy"><span class="figure-zoom"><i data-lucide="expand" aria-hidden="true"></i></span></button><figcaption><span class="figure-number">Fig. 8</span>Shared multivariate context meets channel-specific temporal information.</figcaption></figure>
+      <div class="architecture-notes"><article><span class="note-number">01</span><h3>Embed across channels</h3><p>Jointly embed all variables at each time step into a compact hidden vector.</p><span class="math">h<sub>t</sub> = MLP<sub>emb</sub>(X<sub>t,:</sub>)</span></article><article><span class="note-number">02</span><h3>Aggregate through time</h3><p>A shared MLP recursively combines neighboring nodes into one global representation.</p><span class="math">h<sub>parent</sub> = MLP<sub>agg</sub>([h<sub>left</sub>; h<sub>right</sub>])</span></article><article><span class="note-number">03</span><h3>Keep each channel distinct</h3><p>Add the global root to each channel’s residual, then apply the shared forecasting head.</p><span class="math">Ŷ<sub>:,c</sub> = Predictor(g + r<sub>c</sub>)</span></article></div>
+    </section>
+
+    <section id="results" class="section results-section">
+      <div class="container">
+        <div class="section-kicker"><span>04 / THE EVIDENCE</span><span class="kicker-line"></span></div>
+        <div class="section-heading"><h2>Lightweight doesn’t have<br>to mean <em>less accurate.</em></h2><p class="heading-description">Distilled LAMBS can achieve teacher-level or better accuracy without inheriting their model size. Across settings, better supervision improves the student—but not every teacher, dataset, or metric has the same outcome.</p></div>
+        <div class="result-controls">
+          <div class="control-field"><label for="DatasetSelect">Dataset</label><div class="select-wrap"><select id="DatasetSelect"><option>ETTh1</option><option>ETTh2</option><option>ETTm1</option><option>ETTm2</option><option>ECL</option><option>Solar</option><option>Weather</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div></div>
+          <div class="control-field"><label for="HorizonSelect">Forecast horizon</label><div class="select-wrap"><select id="HorizonSelect"><option value="AVG">Average · all horizons</option><option value="96">96 time steps</option><option value="192">192 time steps</option><option value="336">336 time steps</option><option value="720">720 time steps</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div></div>
+          <fieldset class="control-field metric-field"><legend>Metric</legend><div class="segmented" id="MetricControls"><button class="segment active" aria-pressed="true" data-metric="0">MSE</button><button class="segment" aria-pressed="false" data-metric="1">MAE</button></div></fieldset>
+        </div>
+        <div class="results-title-row"><div><p class="tiny-label" id="ResultsSubtitle">ETTh1 · Average over 96 / 192 / 336 / 720 · Look-back length: 96</p><h3 id="ChartTitle">Forecast error <span>↓ Lower is better</span></h3><p id="ResultsAxisNote" class="axis-note"></p></div><div class="chart-legend"><span><i class="legend-dot standalone"></i>Strong forecasting models</span><span><i class="legend-dot teacher"></i>Teacher</span><span><i class="legend-dot distilled"></i>RoleModel</span></div></div>
+        <div id="ResultsChart" class="results-chart" role="img" aria-label="Forecasting MSE comparison on ETTh1, averaged over four horizons"></div>
+        <p class="data-note">Table I · Eight strong forecasting models and two RoleModel-distilled LAMBS results share the displayed local axis. Standalone LAMBS is omitted from this comparison. The axis range is calculated from the displayed results only and does not start at zero. Bar lengths indicate distance from the displayed axis minimum, not absolute error magnitude. Values and four-horizon averages are reported to three decimal places in the paper; lower MSE and MAE are better.</p>
+      </div>
+    </section>
+
+
+    <section id="compatibility" class="section compatibility-section">
+      <div class="container">
+        <div class="section-kicker"><span>05 / ARCHITECTURE COMPATIBILITY</span><span class="kicker-line"></span></div>
+        <div class="section-heading"><h2>No hidden state?<br><em>No problem.</em></h2><p class="heading-description">Output alignment works with both Representation-based and Direct-mapping students. Compare RoleModel, Traditional (TimeDistill), and Vanilla distillation across eight existing student architectures, with Student-Only training as the reference.</p></div>
+        <div class="compatibility-summary"><div><span class="compatibility-count">8 / 8</span><span>RoleModel students supported</span></div><div><span class="compatibility-count">4 / 8</span><span>Traditional (TimeDistill) students supported</span></div><p>Direct-mapping students do not expose the separately learned hidden representations required for representation alignment. They can still learn through output alignment.</p></div>
+        <div class="result-controls">
+          <div class="control-field"><label for="DistillationDataset">Dataset</label><div class="select-wrap"><select id="DistillationDataset"><option>ETTh1</option><option>ETTm1</option><option>Weather</option><option>ECL</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div></div>
+          <div class="control-field"><label for="DistillationHorizon">Forecast horizon</label><div class="select-wrap"><select id="DistillationHorizon"><option value="AVG">Average · all horizons</option><option value="96">96 time steps</option><option value="192">192 time steps</option><option value="336">336 time steps</option><option value="720">720 time steps</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div></div>
+          <fieldset class="control-field metric-field"><legend>Metric</legend><div class="segmented"><button class="segment active" aria-pressed="true" data-distillation-metric="0">MSE</button><button class="segment" aria-pressed="false" data-distillation-metric="1">MAE</button></div></fieldset>
+        </div>
+        <div class="distillation-context"><p id="DistillationSubtitle" class="tiny-label">ETTh1 · Four-horizon average · Look-back length: 96</p><p id="DistillationTeacher"></p></div>
+        <p id="DistillationScaleNote" class="distillation-scale-note"></p>
+        <div class="framework-header" aria-hidden="true"><span>STUDENT</span><span>Student-Only</span><span class="framework-rolemodel">RoleModel</span><span>Traditional <small>(TimeDistill)</small></span><span>Vanilla</span></div>
+        <div id="DistillationComparison" aria-live="polite" aria-atomic="true"></div>
+        <p class="data-note">Table II · Values are grouped by student. Changes are relative to Student-Only: left of the center zero means lower error; right means higher error. All change bars share the same symmetric percentage scale in the selected setting. Student-Only is the reference and has no change bar. Percentages use the displayed, rounded values. “Not supported” indicates unavailable representation alignment. The four datasets are those reported in Table II.</p>
+      <details class="figure-disclosure"><summary><span><i data-lucide="chart-no-axes-column" aria-hidden="true"></i>Backbone parameter comparison</span><i data-lucide="plus" class="disclosure-plus" aria-hidden="true"></i></summary><div class="disclosure-body"><figure><button class="figure-button" data-figure="9" aria-label="Enlarge backbone parameter counts"><img src="assets/figures/figure-9.webp" width="2600" height="640" alt="Backbone parameter comparison on ECL: LAMBS uses fewer parameters than the strong forecasting teacher models." loading="lazy"></button><figcaption>Fig. 9 · ECL, input length 96. Each bar sums four independent models, one per forecast horizon; totals are not a single deployed model.</figcaption></figure></div></details>
+
+      </div>
+    </section>
+
+    <section class="section container" id="teachers">
+      <div class="section-kicker"><span>06 / TEACHER ENHANCEMENT</span><span class="kicker-line"></span></div>
+      <div class="section-heading"><h2>More teachers.<br><em>The same interface.</em></h2><p class="heading-description">Homogeneous specialists or heterogeneous architectures can supply a single combined sequence. Rolling synthesis and student training stay unchanged.</p></div>
+      <div class="teacher-grid"><article><div class="teacher-heading"><span class="tiny-label">HOMOGENEOUS</span><span class="paper-reference">§III-D1 · Table III</span></div><h3>One architecture, different emphases.</h3><p>Cluster channels using training-data statistics. Each teacher predicts all variables, with stronger training-loss weights for its own cluster. Inverse-distance weights combine their outputs.</p><figure><button class="figure-button" data-figure="6" aria-label="Enlarge homogeneous teacher enhancement"><img src="assets/figures/figure-6.webp" width="2600" height="1357" alt="Channel clusters guide loss weighting for same-architecture teacher specialists, whose outputs are fused." loading="lazy"></button><figcaption>Fig. 6 · Channel-specialized teachers.</figcaption></figure></article><article><div class="teacher-heading"><span class="tiny-label">HETEROGENEOUS</span><span class="paper-reference">§III-D2 · Table IV</span></div><h3>Different architectures, shared knowledge.</h3><p>Train each backbone independently. Lower channel-wise validation error gives a teacher more influence. Fusion weights are fixed separately for the forward and backward ensembles.</p><figure><button class="figure-button" data-figure="7" aria-label="Enlarge heterogeneous teacher enhancement"><img src="assets/figures/figure-7.webp" width="2600" height="1440" alt="Independently trained teacher backbones are fused using channel-wise validation loss." loading="lazy"></button><figcaption>Fig. 7 · Architecture-complementary teachers.</figcaption></figure></article></div>
+      <div class="teacher-summary"><i data-lucide="git-merge" aria-hidden="true"></i><p><strong>Fusion in the sequence space.</strong> No cross-architecture representation alignment is needed. These experiments demonstrate teacher compatibility, rather than a new ensemble algorithm.</p></div>
+    </section>
+
+    <section id="findings" class="section section-tint">
+      <div class="container">
+        <div class="section-kicker"><span>07 / WHAT MAKES IT WORK?</span><span class="kicker-line"></span></div>
+        <div class="section-heading"><h2>Better examples.<br><em>A student ready to learn.</em></h2><p class="heading-description">Ablations separate the value of sample selection from the capacity of the student. Both sides matter for effective knowledge transfer.</p></div>
+        <article class="ablation-block"><div class="ablation-copy"><span class="finding-number">01</span><h3>Discrepancy and diversity<br>are complementary.</h3><p>Teacher–student discrepancy prioritizes samples that remain challenging, while sample diversity favors supervision different from the selected samples. Together, they tailor supervision to the student’s learning state; removing either criterion degrades performance. Including backward-synthesized samples can also degrade performance: the backward teacher expands historical inputs, while the forward teacher provides forecasting targets.</p><div class="control-field"><label for="AblationDataset">Ablation dataset</label><div class="select-wrap"><select id="AblationDataset"><option>ETTh1</option><option>ETTh2</option><option>ETTm1</option><option>ETTm2</option><option>Weather</option><option>Solar</option><option>ECL</option></select><i data-lucide="chevron-down" aria-hidden="true"></i></div></div></div><div class="ablation-results"><div class="table-scroll"><table class="ablation-table"><caption>Table V · EMAformer → LAMBS · four-horizon average</caption><thead><tr><th scope="col">Training variant</th><th scope="col">MSE ↓</th><th scope="col">MAE ↓</th></tr></thead><tbody id="AblationTableBody"></tbody></table></div><p class="data-note">Parentheses show the relative error increase from full RoleModel, using the rounded table values.</p></div></article>
+        <div class="finding-grid"><article><div class="finding-header"><span class="finding-number">02</span><span class="paper-reference">§V-G1</span></div><h3>Channel dependence helps<br>the distilled student.</h3><p>The w/o CD variant can offer greater robustness in standalone training. After RoleModel distillation, retaining channel dependence is consistently more effective in the evaluated settings. The w/o CD variant retains only the channel-independent residual path.</p><figure><button class="figure-button" data-figure="10" aria-label="Enlarge the channel-dependence ablation"><img src="assets/figures/figure-10.webp" width="2600" height="1262" alt="Channel-dependent LAMBS achieves lower MAE after RoleModel distillation than its w/o CD variant on ETTh1, Weather and ECL." loading="lazy"></button><figcaption>Fig. 10 · Channel dependence. MAE, L = T = 96.</figcaption></figure></article><article><div class="finding-header"><span class="finding-number">03</span><span class="paper-reference">§V-G2</span></div><h3>Regularization can change<br>its role under distillation.</h3><p>Moderate dropout helps standalone training in this experiment, but reduces accuracy under RoleModel. Rich synthetic supervision rewards retaining the student’s fitting capacity.</p><figure><button class="figure-button" data-figure="11" aria-label="Enlarge the dropout ablation"><img src="assets/figures/figure-11.webp" width="2600" height="1195" alt="On Weather, increasing dropout hurts RoleModel-distilled LAMBS, while moderate dropout can improve standalone MAE." loading="lazy"></button><figcaption>Fig. 11 · Dropout. Weather, MAE, L = T = 96.</figcaption></figure></article></div>
+      </div>
+    </section>
+
+    <section class="closing-section container" id="takeaway">
+      <div class="closing-heading"><p class="eyebrow">THE TAKEAWAY</p><h2>Improve the supervision.<br><em>Keep the student lightweight.</em></h2><p>RoleModel shifts the focus from aligning hidden representations to creating and selecting the right forecasting examples.</p></div>
+    </section>
+  </main>
+
+  <dialog class="figure-dialog" id="FigureDialog" aria-labelledby="FigureDialogTitle"><div class="dialog-heading"><h2 id="FigureDialogTitle">Paper figure</h2><div><a id="FigureOriginal" class="icon-button" href="assets/figures/figure-2.pdf" target="_blank" rel="noopener" aria-label="Open original vector PDF" title="Open original vector PDF"><i data-lucide="file-text" aria-hidden="true"></i></a><button id="CloseFigure" class="icon-button" aria-label="Close figure" title="Close figure"><i data-lucide="x" aria-hidden="true"></i></button></div></div><div class="dialog-image-wrap"><img id="FigureDialogImage" src="assets/figures/figure-2.webp" alt=""></div><p id="FigureDialogCaption"></p></dialog>
+</body>
+</html>
